@@ -5,7 +5,6 @@ package samples.dynamicwater2d
 
 	public class Spring
 	{
-		public var entity:Entity;
 		public var targetPosition:Number;
 		public var position:Number;
 		public var speed:Number;
@@ -22,7 +21,6 @@ package samples.dynamicwater2d
 			var x:Number = targetPosition - position;
 			speed += tension * x - speed * dampening;
 			position += speed;
-			entity.y = position;
 		}
 	}
 }
