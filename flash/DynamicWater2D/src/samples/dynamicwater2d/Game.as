@@ -14,9 +14,9 @@ package samples.dynamicwater2d
 	
 	public class Game extends QuadraSample
 	{
-		public static const NUM_SPRINGS:int = 247;
-		public static const SPRING_SPACING:Number = 3;
-		public static const WATER_DEPTH:Number = 200;
+		public static const NUM_SPRINGS:int = 38;
+		public static const SPRING_SPACING:Number = 20;
+		public static const WATER_DEPTH:Number = 240;
 		
 		public static var current:Game;
 		
@@ -35,7 +35,7 @@ package samples.dynamicwater2d
 		
 		private function initWater():void
 		{
-			var water:WaterComponent = new WaterComponent(NUM_SPRINGS, SPRING_SPACING, WATER_DEPTH, .025, .025, .25);
+			var water:WaterComponent = new WaterComponent(NUM_SPRINGS, SPRING_SPACING, WATER_DEPTH, .2, .025, .025);
 			var display:WaterDisplayComponent = new WaterDisplayComponent();
 			_water = scene.createEntity([water, display]);
 			_water.y = stage.stageHeight / 2;

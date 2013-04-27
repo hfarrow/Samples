@@ -98,7 +98,7 @@ package samples.dynamicwater2d.components
 		{
 			if (_splashBinding.isButtonPressed())
 			{
-				splash(740/2, 50);
+				splash(740/2, -30);
 			}
 			
 			updateSprings();
