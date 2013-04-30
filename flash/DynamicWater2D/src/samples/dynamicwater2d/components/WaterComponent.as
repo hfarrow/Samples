@@ -1,18 +1,21 @@
 package samples.dynamicwater2d.components
 {
 	import flash.ui.Keyboard;
+	import nape.geom.Vec2;
 	import quadra.input.KeyBinding;
 	import quadra.scene.Entity;
 	import quadra.scene.EntityAttributeNumber;
 	import quadra.scene.EntityAttributeObject;
 	import quadra.scene.IEntityComponent;
 	import samples.dynamicwater2d.Game;
+	import samples.dynamicwater2d.Particle;
 	import samples.dynamicwater2d.Spring;
 	
 
 	public class WaterComponent implements IEntityComponent
 	{
 		private var _entity:Entity;
+		private var _particleSystem:ParticleSystemComponent;
 		
 		private var _springs:Vector.<Spring>
 		private var _springsAttribute:EntityAttributeObject;
@@ -20,7 +23,7 @@ package samples.dynamicwater2d.components
 		private var _dampening:EntityAttributeNumber;
 		private var _spread:EntityAttributeNumber;
 		private var _springSpacing:EntityAttributeNumber;
-		private var _depth:Number;
+		private var _depth:EntityAttributeNumber;
 		private var _numSprings:int;
 		
 		private var _splashBinding:KeyBinding;
@@ -28,15 +31,18 @@ package samples.dynamicwater2d.components
 		public function WaterComponent(numSprings:int, springSpacing:Number, depth:Number, tension:Number=.025, dampening:Number=.025, spread:Number=.25)
 		{
 			_numSprings = numSprings;
-			_depth = depth;
+			
 			_tension = new EntityAttributeNumber("waterTension", tension, this, true);
 			_dampening = new EntityAttributeNumber("waterDampening", dampening, this, true);
 			_spread = new EntityAttributeNumber("waterSpread", spread, this, true);
 			_springSpacing = new EntityAttributeNumber("waterSpringSpacing", springSpacing, this, true);
+			_depth = new EntityAttributeNumber("waterDepth", depth, this, true);
 		}
 		
 		public function init():void 
 		{
+			_particleSystem = _entity.getComponent(ParticleSystemComponent) as ParticleSystemComponent;
+			
 			_splashBinding = new KeyBinding(Keyboard.SPACE);
 			
 			initSprings(_numSprings);
@@ -45,6 +51,7 @@ package samples.dynamicwater2d.components
 			_entity.addAttribute(_dampening);
 			_entity.addAttribute(_spread);
 			_entity.addAttribute(_springSpacing);
+			_entity.addAttribute(_depth);
 		}
 		
 		private function initSprings(numSprings:int):void
@@ -52,8 +59,7 @@ package samples.dynamicwater2d.components
 			_springs = new Vector.<Spring>();
 			for (var i:int = 0; i < numSprings; ++i)
 			{
-				var position:Number = _depth;
-				var spring:Spring = new Spring(position);				
+				var spring:Spring = new Spring(0);				
 				_springs.push(spring);
 			}
 		}
@@ -67,6 +73,7 @@ package samples.dynamicwater2d.components
 			_entity.removeAttribute(_dampening);
 			_entity.removeAttribute(_spread);
 			_entity.removeAttribute(_springSpacing);
+			_entity.removeAttribute(_depth);
 		}
 		
 		public function get type():Class 
@@ -87,18 +94,59 @@ package samples.dynamicwater2d.components
 		public function splash(x:Number, speed:Number):void
 		{
 			var index:int = int(x / Game.SPRING_SPACING);
-			var spring:Spring;
-			if (index >= 0 && index < _springs.length)
+			splashAtSpring(index, speed);
+			splashAtSpring(index + 1, speed);
+			splashAtSpring(index - 1, speed);			
+			createSplashParticles(x, speed);
+		}
+		
+		public function splashAtSpring(index:int, speed:Number):void
+		{
+			if (isValidIndex(index))
 			{
 				_springs[index].speed = speed;
 			}
 		}
 		
+		public function createSplashParticles(x:Number, speed:Number):void
+		{
+			var y:Number = getHeightAtSpring(x);
+			if (speed < -30)
+			{
+				for (var i:int = 0; i < int(Math.abs(speed)) / 4; ++i)
+				{
+					var randomX:Number = Math.random() * 20;
+					var randomY:Number = -Math.random() * 20;
+					var velX:Number = Math.random() * 10 - 5;
+					var velY:Number = -Math.sqrt(Math.abs(speed)) - 2;
+					_particleSystem.addParticle(new Particle(new Vec2(x + randomX, y + randomY), new Vec2(velX, velY), 0));
+				}
+			}
+		}
+		
+		public function getHeightAtSpring(x:Number):Number
+		{
+			var index:int = int(x / Game.SPRING_SPACING);
+			if (isValidIndex(index))
+			{
+				return _springs[index].position;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
+		public function isValidIndex(index:int):Boolean
+		{
+			return index >= 0 && index < _springs.length;
+		}
+		
 		public function update(elapsedTime:Number):void 
 		{
-			if (_splashBinding.isButtonPressed())
+			if (_splashBinding.isButtonJustPressed())
 			{
-				splash(740/2, -30);
+				splash(740/2, -50);
 			}
 			
 			updateSprings();
