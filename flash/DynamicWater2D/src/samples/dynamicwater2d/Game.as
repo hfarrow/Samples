@@ -21,8 +21,8 @@ package samples.dynamicwater2d
 	
 	public class Game extends QuadraSample
 	{
-		public static const NUM_SPRINGS:int = 50;
-		public static const SPRING_SPACING:Number = 16;
+		public static const NUM_SPRINGS:int = 50;//50
+		public static const SPRING_SPACING:Number = 16;//16
 		public static const WATER_DEPTH:Number = 240;
 		
 		[Embed(source = "../../../content/rock.png")]
@@ -34,6 +34,9 @@ package samples.dynamicwater2d
 		private var _water:Entity;
 		private var _rock:Entity;
 		private var _isDroppingRock:Boolean = false;
+		
+		public var lastX:Number;
+		public var lastY:Number;
 		
 		public function Game()
 		{
@@ -99,6 +102,7 @@ package samples.dynamicwater2d
 			if (touch)
 			{
 				var localPos:Point = touch.getLocation(this);
+				
 				trace("Touched object at position: " + localPos);
 				if (!_isDroppingRock)
 				{
@@ -107,6 +111,14 @@ package samples.dynamicwater2d
 					_rock.x = localPos.x;
 					_rock.y = localPos.y;
 				}
+			}
+			
+			touch = event.getTouch(stage, TouchPhase.HOVER);
+			if (touch)
+			{
+				localPos = touch.getLocation(this);
+				lastX = localPos.x;
+				lastY = localPos.y;
 			}
 		}
 	}

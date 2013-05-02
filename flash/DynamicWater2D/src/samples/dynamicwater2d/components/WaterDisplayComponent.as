@@ -1,5 +1,6 @@
 package samples.dynamicwater2d.components
 {
+	import flash.geom.Matrix;
 	import quadra.display.filters.AlphaTestFilter;
 	import quadra.display.TriangleBatch;
 	import quadra.scene.Entity;
@@ -31,12 +32,15 @@ package samples.dynamicwater2d.components
 		private var _particleSystem:ParticleSystemComponent;
 		private var _vertexData:VertexData;
 		private var _indices:Vector.<uint>;
+		private var _vertexDataSurface:VertexData;
 		private var _waterBodyBatch:TriangleBatch;
+		private var _waterSurfaceBatch:TriangleBatch;
 		private var _particlesBatch:QuadBatch;
 		private var _particlesRenderTexture:RenderTexture;
 		private var _particleImage:Image;
 		private var _particleTexture:Texture
 		private var _particlesRenderImage:Image;
+		private var _metaballSprite:Sprite;
 		private var _container:Sprite;
 		
 		public function WaterDisplayComponent()
@@ -50,8 +54,10 @@ package samples.dynamicwater2d.components
 			_particleSystem = _entity.getComponent(ParticleSystemComponent) as ParticleSystemComponent;
 			_container = new Sprite();
 			
+			_metaballSprite = new Sprite();
 			initParticles();
 			initWaterBody();
+			initWaterSurface();
 		}
 		
 		private function initWaterBody():void
@@ -63,22 +69,32 @@ package samples.dynamicwater2d.components
 			_indices = new Vector.<uint>(_springs.length * 6, true);
 		}
 		
+		private function initWaterSurface():void
+		{
+			_waterSurfaceBatch = new TriangleBatch();
+			_vertexDataSurface = new VertexData(_springs.length * 4);
+			_vertexDataSurface.setUniformColor(0xffffff);
+			
+			_metaballSprite.blendMode = BlendMode.ADD;
+			_metaballSprite.addChild(_waterSurfaceBatch);
+		}
+		
 		private function initParticles():void
 		{
 			_particleTexture = Texture.fromBitmap(new DropletTexture());
 			
 			_particlesBatch = new QuadBatch();
-			_particlesBatch.blendMode = BlendMode.ADD;
-			_particlesBatch.filter = new AlphaTestFilter();
-			_container.addChild(_particlesBatch);
+			_metaballSprite.addChild(_particlesBatch);
 			_particleImage = new Image(_particleTexture);
-			_particleImage.color = 0x0000cc;
-			_particleImage.scaleX = 1.5;
-			_particleImage.scaleY = 1.5;
+			//_particleImage.color = 0x0000cc;
+			_particleImage.scaleX = 2.5;
+			_particleImage.scaleY = 2.5;
 			
 			_particlesRenderTexture = new RenderTexture(_entity.stage.stageWidth, _entity.stage.stageHeight, false);
 			_particlesRenderImage = new Image(_particlesRenderTexture);
-			//_container.addChild(_particlesRenderImage);
+			_particlesRenderImage.color = 0x337fcc;
+			_container.addChild(_particlesRenderImage);
+			_particlesRenderImage.filter = new AlphaTestFilter();
 		}
 		
 		public function destroy():void 
@@ -97,8 +113,9 @@ package samples.dynamicwater2d.components
 			
 			_springs = null;
 			_particleImage.dispose();
-			_particleTexture.dispose();	
-			
+			_particleTexture.dispose();
+			_vertexData = null;
+			_vertexDataSurface = null;
 		}		
 		
 		public function get type():Class 
@@ -127,13 +144,36 @@ package samples.dynamicwater2d.components
 			updateWaterParticles(elapsedTime);
 		}
 		
+		private function lerpColor(min:Number, max:Number, t:Number):Number
+		{
+			var minRed:Number = (0xff0000 & min) >> 16;
+			var minGreen:Number = (0xff00 & min) >> 8;
+			var minBlue:Number = (0xff & min);
+			
+			var maxRed:Number = (0xff0000 & max) >> 16;
+			var maxGreen:Number = (0xff00 & max) >> 8;
+			var maxBlue:Number = (0xff & max);
+			
+			var color:Number = 0;
+			color |= lerp(minRed, maxRed, t) << 16;
+			color |= lerp(minGreen, maxGreen, t) << 8;
+			color |= lerp(minBlue, maxBlue, t);
+			return color;
+		}
+		
+		private function lerp(min:Number, max:Number, t:Number):Number
+		{
+			return (max - min) * t + min;
+		}
+		
 		private function updateWaterBody(elaspedTime:Number):void
 		{
 			var springSpacing:Number = _entity.getAttributeNumber("waterSpringSpacing");
 			var depth:Number = _entity.getAttributeNumber("waterDepth");
 			
-			var maxColor:uint = 0x0000cc;
-			var minColor:uint = 0x000055;
+			var maxColor:uint = 0x337fcc;
+			var minColor:uint = 0x000033;
+			var midColor:uint = lerpColor(minColor, maxColor, 0.9);
 			
 			for (var i:int = 0; i < _springs.length-1; ++i)
 			{
@@ -150,13 +190,27 @@ package samples.dynamicwater2d.components
 				_vertexData.setPosition(startIndex + 2, right, bottom);
 				_vertexData.setPosition(startIndex + 3, left, bottom);
 				
+				_vertexDataSurface.setPosition(startIndex + 0, left, spring0 - 40);
+				_vertexDataSurface.setPosition(startIndex + 1, right, spring1 - 40);
+				_vertexDataSurface.setPosition(startIndex + 2, right, spring1);
+				_vertexDataSurface.setPosition(startIndex + 3, left, spring0);
+				
+				
 				// Top vertices (surface)
-				_vertexData.setColor(startIndex + 0, (1 - spring0 / depth) * (maxColor - minColor) + minColor);
-				_vertexData.setColor(startIndex + 1, (1 - spring1 / depth) * (maxColor - minColor) + minColor);
+				_vertexData.setColor(startIndex + 0, lerpColor(minColor, midColor, (1 - spring0 / depth)));
+				_vertexData.setColor(startIndex + 1, lerpColor(minColor, midColor, (1 - spring1 / depth)));
+				
+				//_vertexDataSurface.setColor(startIndex + 0, (1 - spring0 - 10 / depth) * (maxColor - minColor) + minColor);
+				//_vertexDataSurface.setColor(startIndex + 1, (1 - spring1 - 10 / depth) * (maxColor - minColor) + minColor);
+				_vertexDataSurface.setAlpha(startIndex + 0, 0);
+				_vertexDataSurface.setAlpha(startIndex + 1, 0);
 				
 				// Bottom Vertices (water floor)
 				_vertexData.setColor(startIndex + 2, minColor);
 				_vertexData.setColor(startIndex + 3, minColor);
+				
+				//_vertexDataSurface.setColor(startIndex + 2, (1 - spring1 / depth) * (maxColor - minColor) + minColor);
+				//_vertexDataSurface.setColor(startIndex + 3, (1 - spring0 / depth) * (maxColor - minColor) + minColor);
 				
 				// Build 2 triangles out of the four corner vertices.
 				_indices[indicesStartIndex + 0] = startIndex + 0;
@@ -169,6 +223,9 @@ package samples.dynamicwater2d.components
 			
 			_waterBodyBatch.clear();
 			_waterBodyBatch.addVertices(_vertexData, _indices);
+			
+			_waterSurfaceBatch.clear();
+			_waterSurfaceBatch.addVertices(_vertexDataSurface, _indices);
 		}
 		
 		private function updateWaterParticles(elapsedTime:Number):void
@@ -188,9 +245,11 @@ package samples.dynamicwater2d.components
 			// Render water particles into texture.
 			_particlesRenderTexture.drawBundled(function():void
 			{
-				_particlesRenderTexture.draw(_particlesBatch, _container.getTransformationMatrix(Game.current));
+				var transform:Matrix = _container.getTransformationMatrix(Game.current);
+				_particlesRenderTexture.draw(_metaballSprite, transform);
 			});
 			
+			//_particlesRenderImage.texture = _particlesRenderTexture;
 			_particlesRenderImage.x = -_entity.x
 			_particlesRenderImage.y = -_entity.y
 		}

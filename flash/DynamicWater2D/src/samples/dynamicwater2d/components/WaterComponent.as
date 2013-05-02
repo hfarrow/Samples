@@ -25,6 +25,7 @@ package samples.dynamicwater2d.components
 		private var _springSpacing:EntityAttributeNumber;
 		private var _depth:EntityAttributeNumber;
 		private var _numSprings:int;
+		private var _timeCounter:Number = 0;
 		
 		private var _splashBinding:KeyBinding;
 		
@@ -111,14 +112,14 @@ package samples.dynamicwater2d.components
 		public function createSplashParticles(x:Number, speed:Number):void
 		{
 			var y:Number = getHeightAtSpring(x);
-			if (speed < -30)
+			if (speed < 0)
 			{
-				for (var i:int = 0; i < int(Math.abs(speed)) / 4; ++i)
+				for (var i:int = 0; i < int(Math.abs(speed)) / 2; ++i)
 				{
-					var randomX:Number = Math.random() * 20;
-					var randomY:Number = -Math.random() * 20;
+					var randomX:Number = Math.random() * 20 - 10;
+					var randomY:Number = -Math.random() * 20 - 10;
 					var velX:Number = Math.random() * 10 - 5;
-					var velY:Number = -Math.sqrt(Math.abs(speed)) - 2;
+					var velY:Number = -Math.sqrt(Math.abs(speed))-4;
 					_particleSystem.addParticle(new Particle(new Vec2(x + randomX, y + randomY), new Vec2(velX, velY), 0));
 				}
 			}
@@ -149,7 +150,35 @@ package samples.dynamicwater2d.components
 				splash(740/2, -50);
 			}
 			
+			spawnFallingWater(elapsedTime);
 			updateSprings();
+		}
+		
+		private function spawnFallingWater(elapsedTime:Number):void
+		{
+			var y:Number;
+			var x:Number;
+			x = Game.current.lastX;
+			y = Game.current.lastY - 250;
+			if (isNaN(x))
+			{
+				x = 760 / 2;
+				y = -100;
+			}
+			_timeCounter += elapsedTime;
+			
+			if (_timeCounter > 0.02)
+			{
+				_timeCounter = 0;
+				for (var i:int = 0; i < 1; ++i)
+				{
+					var randomX:Number = Math.random() * 10 - 5;
+					var randomY:Number = -Math.random() * 10 - 5;
+					var velX:Number = Math.random() * 5 - 2.5;
+					var velY:Number = Math.random() * -10;
+					_particleSystem.addParticle(new Particle(new Vec2(x + randomX, y + randomY), new Vec2(velX, velY), 0));
+				}
+			}
 		}
 		
 		private var lDeltas:Array = new Array();

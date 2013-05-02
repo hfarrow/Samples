@@ -11,7 +11,7 @@ package samples.dynamicwater2d.components
 	{		
 		private var _entity:Entity;
 		private var _particles:Vector.<Particle>
-		public var gravity:Number = .8;
+		public var gravity:Number = .7;
 		
 		public function ParticleSystemComponent()
 		{		
