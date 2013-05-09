@@ -1,7 +1,6 @@
 package samples.dynamicwater2d
 {
 	import nape.geom.Vec2;
-	import quadra.scene.Entity;
 
 	public class Spring
 	{

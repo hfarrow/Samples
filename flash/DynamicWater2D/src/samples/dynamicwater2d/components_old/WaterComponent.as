@@ -1,4 +1,4 @@
-package samples.dynamicwater2d.components
+package samples.dynamicwater2d.components_old
 {
 	import flash.ui.Keyboard;
 	import nape.geom.Vec2;
