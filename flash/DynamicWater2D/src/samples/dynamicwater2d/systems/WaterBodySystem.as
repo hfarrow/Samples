@@ -1,12 +1,17 @@
 package samples.dynamicwater2d.systems
 {
+	import nape.phys.Body;
+	import quadra.world.components.lib.NapePhysicsComponent;
 	import quadra.world.components.lib.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.EntitySystem;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
+	import samples.dynamicwater2d.events.GameEvent;
+	import samples.dynamicwater2d.Game;
 	import samples.dynamicwater2d.Spring;
+	import starling.events.Event;
 	
 
 	public class WaterBodySystem extends EntitySystem

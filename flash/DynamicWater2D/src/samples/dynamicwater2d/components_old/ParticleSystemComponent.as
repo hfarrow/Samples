@@ -1,4 +1,4 @@
-package samples.dynamicwater2d.components
+package samples.dynamicwater2d.components_old
 {
 	import nape.geom.Vec2;
 	import quadra.scene.Entity;

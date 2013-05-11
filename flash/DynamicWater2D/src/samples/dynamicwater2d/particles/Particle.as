@@ -1,4 +1,4 @@
-package samples.dynamicwater2d
+package samples.dynamicwater2d.particles
 {
 	import nape.geom.Vec2;
 
