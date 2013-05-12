@@ -1,24 +1,43 @@
 package samples.dynamicwater2d.systems
 {
+	import nape.callbacks.CbEvent;
+	import nape.callbacks.InteractionCallback;
+	import nape.callbacks.InteractionListener;
+	import nape.callbacks.InteractionType;
+	import nape.callbacks.Listener;
+	import nape.geom.Vec2;
 	import nape.phys.Body;
 	import quadra.world.components.lib.NapePhysicsComponent;
 	import quadra.world.components.lib.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.EntitySystem;
+	import quadra.world.systems.lib.NapePhysicsSystem;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
+	import samples.dynamicwater2d.events.Callbacks;
 	import samples.dynamicwater2d.events.GameEvent;
 	import samples.dynamicwater2d.Game;
+	import samples.dynamicwater2d.particles.SplashEmitter;
 	import samples.dynamicwater2d.Spring;
 	import starling.events.Event;
 	
 
 	public class WaterBodySystem extends EntitySystem
 	{
+		private var _splashListener:Listener;
+		private var _physicsSystem:NapePhysicsSystem;
+		
 		public function WaterBodySystem()
 		{
 			super(EntityFilter.all([WaterBodyComponent]));
+		}
+		
+		public override function init():void
+		{
+			_physicsSystem = NapePhysicsSystem(_world.systemManager.getSystem(NapePhysicsSystem));
+			_splashListener = new InteractionListener(CbEvent.BEGIN, InteractionType.FLUID, Callbacks.SPLASHER, Callbacks.SPLASHABLE, onSplash);
+			_physicsSystem.space.listeners.add(_splashListener);
 		}
 		
 		protected override function onEntityAdded(entity:Entity):void 
@@ -42,12 +61,42 @@ package samples.dynamicwater2d.systems
 			}
 		}
 		
-		/*
-		public override function update(elapsedTime:Number):void
-		{			
-			super.update(elapsedTime);
+		private function onSplash(cb:InteractionCallback):void
+		{
+			var splasher:Body = cb.int1.castBody;
+			var splashable:Body = cb.int2.castBody;
+			
+			if (splashable.userData.entity != null && splasher.userData.entity != null)
+			{
+				splash(splashable.userData.entity, splasher.position, splasher.velocity.y);
+			}
 		}
-		*/
+		
+		public function splash(splashable:Entity, position:Vec2, speed:Number):void
+		{
+			var body:Body = NapePhysicsComponent(splashable.getComponent(NapePhysicsComponent)).body;
+			var water:WaterBodyComponent = WaterBodyComponent(splashable.getComponent(WaterBodyComponent));
+			var startX:Number = position.x - body.position.x + body.bounds.width / 2; // relative to water coords
+			
+			var index:int = int(position.x / water.springSpacing);
+			splashAtSpring(index, -speed / 8, water);
+			splashAtSpring(index + 1, -speed / 8, water);
+			splashAtSpring(index - 1, -speed / 8, water);			
+			SplashEmitter.emitSlpash(water.splashSystem.createParticle, position.x, water.getHeightAtSpring(position.x) + position.y, speed); 
+		}
+		
+		public function splashAtSpring(index:int, speed:Number, water:WaterBodyComponent):void
+		{
+			if (isValidIndex(index, water.springs))
+			{
+				water.springs[index].speed = speed;
+			}
+		}
+		
+		public function isValidIndex(index:int, springs:Vector.<Spring>):Boolean
+		{
+			return index >= 0 && index < springs.length;
+		}
 		
 		private var lDeltas:Array = new Array(); // Helper for updateSprings
 		private var rDeltas:Array = new Array(); // Helper for updateSprings
@@ -92,8 +141,11 @@ package samples.dynamicwater2d.systems
 		private function updateDisplay(entity:Entity):void
 		{
 			var waterBody:StarlingDisplayComponent = StarlingDisplayComponent(entity.getComponent(StarlingDisplayComponent));
-			var display:WaterBodyDisplay = WaterBodyDisplay(waterBody.displayObject);
-			display.update();
+			if (waterBody != null)
+			{
+				var display:WaterBodyDisplay = WaterBodyDisplay(waterBody.displayObject);
+				display.update();
+			}
 		}
 	}
 }

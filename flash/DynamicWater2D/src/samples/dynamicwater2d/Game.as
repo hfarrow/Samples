@@ -13,22 +13,20 @@ package samples.dynamicwater2d
 	import quadra.world.Entity;
 	import quadra.world.systems.lib.display.StarlingRenderSystem;
 	import quadra.world.systems.lib.NapePhysicsSystem;
+	import samples.dynamicwater2d.components.ParticleSystemComponent;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
 	import samples.dynamicwater2d.events.Callbacks;
+	import samples.dynamicwater2d.particles.PositionMutator;
+	import samples.dynamicwater2d.particles.SplashLifeMutator;
+	import samples.dynamicwater2d.particles.VelocityMutator;
 	import samples.dynamicwater2d.systems.InputSystem;
+	import samples.dynamicwater2d.systems.MetaballRendererSystem;
 	import samples.dynamicwater2d.systems.ParticleSystem;
 	import samples.dynamicwater2d.systems.WaterBodySystem;
-	import samples.dynamicwater2d.systems.WaterSplashSystem;
 	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.textures.Texture;
-	
-	// TODO:
-	// Splash system extends GroupSystem
-	//		-Processes all "splashes" entities
-	//		-Sets up collision detection between water and entities
-	// Water needs a physics body for collision or just use spring height?
 	
 	public class Game extends QuadraSample
 	{
@@ -40,10 +38,15 @@ package samples.dynamicwater2d
 		private var RockTexture:Class;
 		private var _rockTexture:Texture;
 		
+		[Embed(source = "../../../content/metaparticle.png")]
+		private var DropletTexture:Class;
+		private var _dropletTexture:Texture;
+		
 		public static var current:Game;
 		
 		private var _water:Entity;
 		private var _rock:Entity;
+		private var _particleSystem:Entity;
 		
 		public function Game()
 		{
@@ -54,6 +57,7 @@ package samples.dynamicwater2d
 		protected override function init():void
 		{
 			initWorld();
+			initParticleSystem();
 			initWater();
 			initRock();
 		}
@@ -62,10 +66,25 @@ package samples.dynamicwater2d
 		{
 			world.systemManager.addSystem(new NapePhysicsSystem(true, new Vec2(0, 300)));
 			world.systemManager.addSystem(new WaterBodySystem());
-			world.systemManager.addSystem(new WaterSplashSystem());
 			world.systemManager.addSystem(new InputSystem());
 			world.systemManager.addSystem(new ParticleSystem());
 			world.systemManager.addSystem(new StarlingRenderSystem(this));
+			world.systemManager.addSystem(new MetaballRendererSystem()); // must be after StarlingrenderSystem
+		}
+		
+		private function initParticleSystem():void
+		{
+			_dropletTexture = Texture.fromBitmap(new DropletTexture());
+			
+			_particleSystem = world.createEntity();
+			var system:ParticleSystemComponent = new ParticleSystemComponent(1000, _dropletTexture);
+			system.mutators.push(new VelocityMutator(new Vec2(0, 250)));
+			system.mutators.push(new PositionMutator());
+			system.mutators.push(new SplashLifeMutator(stage.stageHeight / 2 + 30));
+			_particleSystem.addComponent(system);
+			_particleSystem.addComponent(new StarlingDisplayComponent(system.display));
+			_particleSystem.addToGroup(Group.METABALLS);
+			_particleSystem.refresh();
 		}
 		
 		private function initWater():void
@@ -83,7 +102,9 @@ package samples.dynamicwater2d
 			waterBody.cbTypes.add(Callbacks.SPLASHABLE);
 			
 			_water = world.createEntity();
-			_water.addComponent(new WaterBodyComponent(NUM_SPRINGS, SPRING_SPACING, stage.stageHeight / 2, .2, .025, .025));
+			var waterBodyCmp:WaterBodyComponent = new WaterBodyComponent(NUM_SPRINGS, SPRING_SPACING, stage.stageHeight / 2, .2, .025, .025);
+			waterBodyCmp.splashSystem = ParticleSystemComponent(_particleSystem.getComponent(ParticleSystemComponent));
+			_water.addComponent(waterBodyCmp);
 			_water.addComponent(new SpatialComponent());
 			_water.addComponent(new VelocityComponent());
 			_water.addComponent(new NapePhysicsComponent(waterBody));

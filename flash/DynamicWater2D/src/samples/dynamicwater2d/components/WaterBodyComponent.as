@@ -2,13 +2,13 @@ package samples.dynamicwater2d.components
 {
 	import quadra.world.Entity;
 	import quadra.world.IEntityComponent;
+	import samples.dynamicwater2d.particles.SplashEmitter;
 	import samples.dynamicwater2d.Spring;
 	
 
 	public class WaterBodyComponent implements IEntityComponent
 	{
-		private var _entity:Entity;
-		
+		public var splashSystem:ParticleSystemComponent;
 		private var _springs:Vector.<Spring>
 		private var _tension:Number;
 		private var _dampening:Number;
@@ -22,23 +22,13 @@ package samples.dynamicwater2d.components
 			_depth = depth;
 			_tension = tension;
 			_dampening = dampening;
-			_spread = spread;
+			_spread = spread;			
 			
 			_springs = new Vector.<Spring>(numSprings, true);
 			for ( var i:int = 0; i < numSprings; ++i)
 			{
 				_springs[i] = new Spring(0);
 			}
-		}
-		
-		public function init(entity:Entity):void 
-		{
-			_entity = entity;
-		}
-		
-		public function shutdown():void 
-		{
-			
 		}
 		
 		public function get springs():Vector.<Spring>
