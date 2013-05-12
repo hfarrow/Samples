@@ -134,27 +134,6 @@ package samples.dynamicwater2d
 		protected override function update(elaspedTime:Number):void
 		{
 			super.update(elaspedTime);
-			
-			/*
-			var oldY:Number = _rock.y;
-			_rock.y += 250 * elaspedTime
-			if (_isDroppingRock)
-			{
-				var water:WaterComponent = _water.getComponent(WaterComponent) as WaterComponent;;
-				if (_rock.y > _water.y + water.getHeightAtSpring(_rock.x))
-				{
-					_isDroppingRock = false;
-					water.splash(_rock.x, -50);
-					_rock.visible = false;
-				}
-			}
-			
-			var boundry:Number = stage.height + _rock.height / 2;
-			if (_rock.y > boundry)
-			{
-				_rock.y = boundry;
-			}
-			*/
 		}
 	}
 }
