@@ -92,7 +92,7 @@ package samples.dynamicwater2d.systems
 			var water:WaterBodyComponent = WaterBodyComponent(splashable.getComponent(WaterBodyComponent));
 			var startX:Number = splasher.position.x - body.position.x + body.bounds.width / 2; // relative to water coords
 			
-			splasher.velocity.y /= 4;
+			splasher.velocity.y /= 3;
 			
 			// Prevent a body from splashing more than once within a time frame.
 			// Since the surface of the water is animated, the animation can move
@@ -104,13 +104,16 @@ package samples.dynamicwater2d.systems
 			}
 			splasher.userData.lastSplash = getTimer();
 			
-			var index:int = int(splasher.position.x / water.springSpacing);
-			splashAtSpring(index, -speed * 1.3, water);
-			splashAtSpring(index + 1, -speed * 1.15, water);
-			splashAtSpring(index - 1, -speed * 1.15, water);
-			splashAtSpring(index + 2, -speed * 0.5, water);
-			splashAtSpring(index - 2, -speed * 0.5, water);
-			SplashEmitter.emitSlpash(water.splashSystem.createParticle, splasher.position.x, water.getHeightAtSpring(splasher.position.x) + splasher.position.y + splasher.bounds.height / 2, speed);
+			var index:int = int(Math.round(splasher.position.x / water.springSpacing));
+			splashAtSpring(index, -speed * 1.2, water);
+			splashAtSpring(index + 1, -speed * 1.1, water);
+			splashAtSpring(index - 1, -speed * 1.1, water);
+			splashAtSpring(index + 2, -speed * 0.25, water);
+			splashAtSpring(index - 2, -speed * 0.25, water);
+			SplashEmitter.emitSlpash(water.splashSystem.createParticle,
+									 splasher.position.x,
+									 water.getHeightAtSpring(splasher.position.x) + splasher.position.y + splasher.bounds.height / 2,
+									 speed);
 		}
 		
 		public function splashAtSpring(index:int, speed:Number, water:WaterBodyComponent):void

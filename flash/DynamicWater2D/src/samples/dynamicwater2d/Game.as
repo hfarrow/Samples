@@ -22,6 +22,7 @@ package samples.dynamicwater2d
 	import samples.dynamicwater2d.systems.InputSystem;
 	import samples.dynamicwater2d.systems.MetaballRendererSystem;
 	import samples.dynamicwater2d.systems.ParticleSystem;
+	import samples.dynamicwater2d.systems.RockSystem;
 	import samples.dynamicwater2d.systems.WaterBodySystem;
 	import starling.core.Starling;
 	import starling.display.Image;
@@ -71,6 +72,7 @@ package samples.dynamicwater2d
 			world.systemManager.addSystem(new WaterBodySystem());
 			world.systemManager.addSystem(new InputSystem());
 			world.systemManager.addSystem(new ParticleSystem());
+			world.systemManager.addSystem(new RockSystem());
 			world.systemManager.addSystem(new StarlingRenderSystem(this));
 			world.systemManager.addSystem(new MetaballRendererSystem()); // must be after StarlingrenderSystem
 		}
