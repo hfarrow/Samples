@@ -12,15 +12,15 @@ package samples.dynamicwater2d.components
 		private var _particles:Vector.<Particle>
 		private var _maxParticles:uint;
 		private var _numActiveParticles:uint;
-		private var _display:ParticleSystemDisplay;
+		//private var _display:ParticleSystemDisplay;
 		
-		public function ParticleSystemComponent(maxParticles:uint, texture:Texture)
+		public function ParticleSystemComponent(maxParticles:uint)
 		{
 			_mutators = new Vector.<ParticleMutator>();
 			_maxParticles = maxParticles;
 			_particles = new Vector.<Particle>(_maxParticles);
 			_numActiveParticles = 0;
-			_display = new ParticleSystemDisplay(this, texture);
+			//_display = new ParticleSystemDisplay(this, texture);
 		}
 		
 		public function get mutators():Vector.<ParticleMutator>
@@ -43,10 +43,12 @@ package samples.dynamicwater2d.components
 			return _maxParticles;
 		}
 		
+		/*
 		public function get display():ParticleSystemDisplay
 		{
 			return _display;
 		}
+		*/
 		
 		public function createParticle():Particle
 		{

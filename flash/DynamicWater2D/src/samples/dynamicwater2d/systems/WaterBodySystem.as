@@ -1,12 +1,16 @@
 package samples.dynamicwater2d.systems
 {
+	import flash.geom.Matrix;
+	import flash.utils.getTimer;
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.InteractionCallback;
 	import nape.callbacks.InteractionListener;
 	import nape.callbacks.InteractionType;
 	import nape.callbacks.Listener;
+	import nape.geom.Mat23;
 	import nape.geom.Vec2;
 	import nape.phys.Body;
+	import nape.shape.Polygon;
 	import quadra.world.components.lib.NapePhysicsComponent;
 	import quadra.world.components.lib.StarlingDisplayComponent;
 	import quadra.world.Entity;
@@ -21,10 +25,13 @@ package samples.dynamicwater2d.systems
 	import samples.dynamicwater2d.particles.SplashEmitter;
 	import samples.dynamicwater2d.Spring;
 	import starling.events.Event;
+	import starling.utils.MatrixUtil;
 	
 
 	public class WaterBodySystem extends EntitySystem
 	{
+		private static const MIN_TIME_BETWEEN_SPLASHES:int = 500;
+		
 		private var _splashListener:Listener;
 		private var _physicsSystem:NapePhysicsSystem;
 		
@@ -42,7 +49,20 @@ package samples.dynamicwater2d.systems
 		
 		protected override function onEntityAdded(entity:Entity):void 
 		{
+			var body:Body = NapePhysicsComponent(entity.getComponent(NapePhysicsComponent)).body;
+			var water:WaterBodyComponent = WaterBodyComponent(entity.getComponent(WaterBodyComponent));
+			var waterHalfWidth:Number = water.springSpacing * water.springs.length / 2;
 			
+			for (var i:int = 0; i < water.springs.length - 1; ++i)
+			{
+				var poly:Polygon = new Polygon(Polygon.rect(i * water.springSpacing - waterHalfWidth + water.springSpacing / 2, -water.depth / 2, water.springSpacing, water.depth, true));
+				poly.filter.collisionMask = 0;
+				poly.fluidEnabled = true;
+				poly.filter.fluidMask = 2;
+				poly.fluidProperties.density = 4;
+				poly.fluidProperties.viscosity = 5;
+				body.shapes.add(poly);
+			}
 		}
 		
 		protected override function onEntityRemoved(entity:Entity):void
@@ -56,6 +76,7 @@ package samples.dynamicwater2d.systems
 			for (var i:int = 0; i < entities.length; ++i)
 			{
 				entity = entities[i];
+				updateShapes(entity);
 				updateSprings(entity);
 				updateDisplay(entity);
 			}
@@ -68,21 +89,34 @@ package samples.dynamicwater2d.systems
 			
 			if (splashable.userData.entity != null && splasher.userData.entity != null)
 			{
-				splash(splashable.userData.entity, splasher.position, splasher.velocity.y);
+				splash(splashable.userData.entity, splasher, splasher.velocity.y);
 			}
 		}
 		
-		public function splash(splashable:Entity, position:Vec2, speed:Number):void
+		public function splash(splashable:Entity, splasher:Body, speed:Number):void
 		{
 			var body:Body = NapePhysicsComponent(splashable.getComponent(NapePhysicsComponent)).body;
 			var water:WaterBodyComponent = WaterBodyComponent(splashable.getComponent(WaterBodyComponent));
-			var startX:Number = position.x - body.position.x + body.bounds.width / 2; // relative to water coords
+			var startX:Number = splasher.position.x - body.position.x + body.bounds.width / 2; // relative to water coords
 			
-			var index:int = int(position.x / water.springSpacing);
-			splashAtSpring(index, -speed / 8, water);
-			splashAtSpring(index + 1, -speed / 8, water);
-			splashAtSpring(index - 1, -speed / 8, water);			
-			SplashEmitter.emitSlpash(water.splashSystem.createParticle, position.x, water.getHeightAtSpring(position.x) + position.y, speed); 
+			// Prevent a body from splashing more than once within a time frame.
+			// Since the surface of the water is animated, the animation can move
+			// faster than the splasher causing multiple collisions.
+			var currentTime:int = getTimer();
+			if (splasher.userData.lastSplash != null && currentTime - splasher.userData.lastSplash < MIN_TIME_BETWEEN_SPLASHES)
+			{
+				return;
+			}
+			splasher.userData.lastSplash = getTimer();
+			splasher.velocity.y /= 2;
+			
+			var index:int = int(splasher.position.x / water.springSpacing);
+			splashAtSpring(index, -speed / 10, water);
+			splashAtSpring(index + 1, -speed / 12, water);
+			splashAtSpring(index - 1, -speed / 12, water);
+			splashAtSpring(index + 2, -speed / 14, water);
+			splashAtSpring(index - 2, -speed / 14, water);
+			SplashEmitter.emitSlpash(water.splashSystem.createParticle, splasher.position.x, water.getHeightAtSpring(splasher.position.x) + splasher.position.y + splasher.bounds.height / 2, speed);
 		}
 		
 		public function splashAtSpring(index:int, speed:Number, water:WaterBodyComponent):void
@@ -96,6 +130,20 @@ package samples.dynamicwater2d.systems
 		public function isValidIndex(index:int, springs:Vector.<Spring>):Boolean
 		{
 			return index >= 0 && index < springs.length;
+		}
+		
+		private function updateShapes(entity:Entity):void
+		{
+			var body:Body = NapePhysicsComponent(entity.getComponent(NapePhysicsComponent)).body;
+			var water:WaterBodyComponent = WaterBodyComponent(entity.getComponent(WaterBodyComponent));
+			var waterHalfWidth:Number = water.springSpacing * (water.springs.length-1) / 2;
+			
+			for (var i:int = 0; i < water.springs.length - 1; ++i)
+			{				
+				var poly:Polygon = Polygon(body.shapes.at(water.springs.length - 2  - i));
+				poly.localVerts.at(0).y = -(water.depth / 2) - water.springs[i].position;
+				poly.localVerts.at(1).y = -(water.depth / 2) - water.springs[i+1].position;
+			}
 		}
 		
 		private var lDeltas:Array = new Array(); // Helper for updateSprings

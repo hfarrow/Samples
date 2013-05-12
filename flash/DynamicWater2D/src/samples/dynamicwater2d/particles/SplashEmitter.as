@@ -8,7 +8,8 @@ package samples.dynamicwater2d.particles
 		{
 			if (speed > 0)
 			{
-				for (var i:int = 0; i < int(Math.abs(speed)) / 8; ++i)
+				trace("Spawn " + (int(Math.abs(speed)) / 12) + " particles");
+				for (var i:int = 0; i < int(Math.abs(speed)) / 12; ++i)
 				{
 					var randomX:Number = Math.random() * 20 - 10;
 					var randomY:Number = -Math.random() * 20 - 10;
@@ -17,7 +18,7 @@ package samples.dynamicwater2d.particles
 					var particle:Particle = createFunction();
 					particle.position.setxy(x + randomX, y + randomY);
 					particle.velocity.setxy(velX, velY);
-					particle.scale = 1.5;
+					particle.scale = 1.75;
 				}
 			}
 		}

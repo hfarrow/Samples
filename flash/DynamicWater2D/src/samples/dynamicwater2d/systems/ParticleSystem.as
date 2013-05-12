@@ -1,5 +1,6 @@
 package samples.dynamicwater2d.systems
 {
+	import quadra.world.components.lib.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.EntitySystem;	
@@ -38,9 +39,12 @@ package samples.dynamicwater2d.systems
 				system = ParticleSystemComponent(entity.getComponent(ParticleSystemComponent));
 				particles = system.particles;
 				mutators = system.mutators;
-				display = system.display;
+				display = StarlingDisplayComponent(entity.getComponent(StarlingDisplayComponent)).displayObject as ParticleSystemDisplay;
 				
-				display.reset();
+				if (display != null)
+				{
+					display.reset();
+				}
 				
 				for (var j:int = 0; j < system.numActiveParticles; ++j)
 				{
@@ -58,7 +62,7 @@ package samples.dynamicwater2d.systems
 						}
 					}
 					
-					if (!removed)
+					if (!removed && display != null)
 					{
 						display.addParticle(particles[j]);
 					}

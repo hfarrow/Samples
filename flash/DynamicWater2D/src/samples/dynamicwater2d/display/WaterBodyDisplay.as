@@ -1,10 +1,14 @@
 package samples.dynamicwater2d.display
 {
+	import flash.geom.Matrix;
+	import flash.geom.Point;
+	import quadra.core.QuadraGame;
 	import quadra.display.TriangleBatch;
 	import quadra.utils.Lerp;
 	import quadra.world.Entity;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.Spring;
+	import starling.display.DisplayObject;
 	import starling.display.Quad;
 	import starling.display.Sprite;
 	import starling.utils.VertexData;
@@ -15,7 +19,9 @@ package samples.dynamicwater2d.display
 		private var _entity:Entity;
 		private var _waterBody:WaterBodyComponent;
 		private var _waterBodyBatch:TriangleBatch;
+		private var _waterSurfaceBatch:TriangleBatch;
 		private var _vertexData:VertexData;
+		private var _vertexDataSurface:VertexData;
 		private var _indices:Vector.<uint>;
 		
 		public function WaterBodyDisplay(entity:Entity)
@@ -24,20 +30,35 @@ package samples.dynamicwater2d.display
 			_waterBody = WaterBodyComponent(_entity.getComponent(WaterBodyComponent));
 			
 			initWaterBody();
+			initWaterSurface();
 		}
 		
 		private function initWaterBody():void
 		{
 			_waterBodyBatch = new TriangleBatch();
+			_waterSurfaceBatch = new TriangleBatch();
 			addChild(_waterBodyBatch);
+			
 			_vertexData = new VertexData(_waterBody.springs.length * 4);
 			_vertexData.setUniformColor(0x0000ff);
 			_indices = new Vector.<uint>(_waterBody.springs.length * 6, true);
 		}
 		
+		private function initWaterSurface():void
+		{
+			_waterSurfaceBatch = new TriangleBatch();
+			_vertexDataSurface = new VertexData(_waterBody.springs.length * 4);
+			_vertexDataSurface.setUniformColor(0xffffff);
+		}
+		
 		public override function dispose():void
 		{
 			super.dispose();
+		}
+		
+		public function get waterSurfaceDisplay():DisplayObject
+		{
+			return _waterSurfaceBatch;
 		}
 		
 		public function update():void
@@ -55,6 +76,8 @@ package samples.dynamicwater2d.display
 			var minColor:uint = 0x000033;
 			var midColor:uint = Lerp.color(minColor, maxColor, 0.9);
 			
+			var surfaceTransform:Matrix = getTransformationMatrix(QuadraGame.current);
+			
 			for (var i:int = 0; i < springs.length-1; ++i)
 			{
 				var left:Number = i * springSpacing;
@@ -69,28 +92,28 @@ package samples.dynamicwater2d.display
 				_vertexData.setPosition(startIndex + 1, right, spring1);
 				_vertexData.setPosition(startIndex + 2, right, bottom);
 				_vertexData.setPosition(startIndex + 3, left, bottom);
+				_vertexData.setAlpha(startIndex + 0, this.alpha);
+				_vertexData.setAlpha(startIndex + 1, this.alpha);
+				_vertexData.setAlpha(startIndex + 2, this.alpha);
+				_vertexData.setAlpha(startIndex + 3, this.alpha);
 				
-				////_vertexDataSurface.setPosition(startIndex + 0, left, spring0 - 40);
-				////_vertexDataSurface.setPosition(startIndex + 1, right, spring1 - 40);
-				////_vertexDataSurface.setPosition(startIndex + 2, right, spring1);
-				////_vertexDataSurface.setPosition(startIndex + 3, left, spring0);
+				_vertexDataSurface.setPosition(startIndex + 0, left, spring0 - 40);
+				_vertexDataSurface.setPosition(startIndex + 1, right, spring1 - 40);
+				_vertexDataSurface.setPosition(startIndex + 2, right, spring1);
+				_vertexDataSurface.setPosition(startIndex + 3, left, spring0);
+				_vertexDataSurface.transformVertex(startIndex, surfaceTransform, 4);
 				
 				
 				// Top vertices (surface)
 				_vertexData.setColor(startIndex + 0, Lerp.color(minColor, midColor, (1 - spring0 / depth)));
 				_vertexData.setColor(startIndex + 1, Lerp.color(minColor, midColor, (1 - spring1 / depth)));
 				
-				//_vertexDataSurface.setColor(startIndex + 0, (1 - spring0 - 10 / depth) * (maxColor - minColor) + minColor);
-				//_vertexDataSurface.setColor(startIndex + 1, (1 - spring1 - 10 / depth) * (maxColor - minColor) + minColor);
-				////_vertexDataSurface.setAlpha(startIndex + 0, 0);
-				////_vertexDataSurface.setAlpha(startIndex + 1, 0);
+				_vertexDataSurface.setAlpha(startIndex + 0, 0);
+				_vertexDataSurface.setAlpha(startIndex + 1, 0);
 				
 				// Bottom Vertices (water floor)
 				_vertexData.setColor(startIndex + 2, minColor);
 				_vertexData.setColor(startIndex + 3, minColor);
-				
-				//_vertexDataSurface.setColor(startIndex + 2, (1 - spring1 / depth) * (maxColor - minColor) + minColor);
-				//_vertexDataSurface.setColor(startIndex + 3, (1 - spring0 / depth) * (maxColor - minColor) + minColor);
 				
 				// Build 2 triangles out of the four corner vertices.
 				_indices[indicesStartIndex + 0] = startIndex + 0;
@@ -104,8 +127,8 @@ package samples.dynamicwater2d.display
 			_waterBodyBatch.clear();
 			_waterBodyBatch.addVertices(_vertexData, _indices);
 			
-			////_waterSurfaceBatch.clear();
-			////_waterSurfaceBatch.addVertices(_vertexDataSurface, _indices);
+			_waterSurfaceBatch.clear();
+			_waterSurfaceBatch.addVertices(_vertexDataSurface, _indices);
 		}
 	}
 }

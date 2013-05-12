@@ -15,6 +15,7 @@ package samples.dynamicwater2d
 	import quadra.world.systems.lib.NapePhysicsSystem;
 	import samples.dynamicwater2d.components.ParticleSystemComponent;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
+	import samples.dynamicwater2d.display.ParticleSystemDisplay;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
 	import samples.dynamicwater2d.events.Callbacks;
 	import samples.dynamicwater2d.particles.PositionMutator;
@@ -30,21 +31,23 @@ package samples.dynamicwater2d
 	
 	public class Game extends QuadraSample
 	{
-		public static const NUM_SPRINGS:int = 50;//50
-		public static const SPRING_SPACING:Number = 16;//16
+		public static const NUM_SPRINGS:int = 51;
+		public static const SPRING_SPACING:Number = 14.8;
 		public static const WATER_DEPTH:Number = 240;
-		
-		[Embed(source = "../../../content/rock.png")]
-		private var RockTexture:Class;
-		private var _rockTexture:Texture;
 		
 		[Embed(source = "../../../content/metaparticle.png")]
 		private var DropletTexture:Class;
 		private var _dropletTexture:Texture;
 		
+		[Embed(source = "../../../content/sky.png")]
+		private var SkyTexture:Class;
+		private var _skyTexture:Texture;
+		
 		public static var current:Game;
 		
+		private var _sky:Entity;
 		private var _water:Entity;
+		private var _waterSurface:Entity;
 		private var _rock:Entity;
 		private var _particleSystem:Entity;
 		
@@ -57,14 +60,14 @@ package samples.dynamicwater2d
 		protected override function init():void
 		{
 			initWorld();
+			initSky();
 			initParticleSystem();
 			initWater();
-			initRock();
 		}
 		
 		private function initWorld():void
 		{
-			world.systemManager.addSystem(new NapePhysicsSystem(true, new Vec2(0, 300)));
+			world.systemManager.addSystem(new NapePhysicsSystem(false, new Vec2(0, 300)));
 			world.systemManager.addSystem(new WaterBodySystem());
 			world.systemManager.addSystem(new InputSystem());
 			world.systemManager.addSystem(new ParticleSystem());
@@ -72,17 +75,30 @@ package samples.dynamicwater2d
 			world.systemManager.addSystem(new MetaballRendererSystem()); // must be after StarlingrenderSystem
 		}
 		
+		private function initSky():void
+		{
+			_skyTexture = Texture.fromBitmap(new SkyTexture());
+			var skyImage:Image = new Image(_skyTexture);
+			skyImage.scaleX = 2;
+			skyImage.scaleY = 2;
+			
+			_sky = world.createEntity();
+			_sky.addComponent(new SpatialComponent());
+			_sky.addComponent(new StarlingDisplayComponent(skyImage, -1, true));
+			_sky.refresh();
+		}
+		
 		private function initParticleSystem():void
 		{
 			_dropletTexture = Texture.fromBitmap(new DropletTexture());
 			
 			_particleSystem = world.createEntity();
-			var system:ParticleSystemComponent = new ParticleSystemComponent(1000, _dropletTexture);
+			var system:ParticleSystemComponent = new ParticleSystemComponent(1000);
 			system.mutators.push(new VelocityMutator(new Vec2(0, 250)));
 			system.mutators.push(new PositionMutator());
-			system.mutators.push(new SplashLifeMutator(stage.stageHeight / 2 + 30));
+			system.mutators.push(new SplashLifeMutator(stage.stageHeight / 2 + 0));
 			_particleSystem.addComponent(system);
-			_particleSystem.addComponent(new StarlingDisplayComponent(system.display));
+			_particleSystem.addComponent(new StarlingDisplayComponent(new ParticleSystemDisplay(system, _dropletTexture)));
 			_particleSystem.addToGroup(Group.METABALLS);
 			_particleSystem.refresh();
 		}
@@ -90,13 +106,6 @@ package samples.dynamicwater2d
 		private function initWater():void
 		{
 			var waterBody:Body = new Body(BodyType.KINEMATIC);
-			var waterShape:Shape = new Polygon(Polygon.box(stage.stageWidth, stage.stageHeight / 2));
-			waterShape.filter.collisionMask = 0;
-			waterShape.fluidEnabled = true;
-			waterShape.filter.fluidMask = 2;
-			waterShape.fluidProperties.density = 3;
-			waterShape.fluidProperties.viscosity = 2;
-			waterBody.shapes.add(waterShape);
 			waterBody.position.x = stage.stageWidth / 2;
 			waterBody.position.y = stage.stageHeight - stage.stageHeight / 4;
 			waterBody.cbTypes.add(Callbacks.SPLASHABLE);
@@ -108,34 +117,19 @@ package samples.dynamicwater2d
 			_water.addComponent(new SpatialComponent());
 			_water.addComponent(new VelocityComponent());
 			_water.addComponent(new NapePhysicsComponent(waterBody));
-			var display:StarlingDisplayComponent = new StarlingDisplayComponent(new WaterBodyDisplay(_water), 0);
+			var waterBodyDisplay:WaterBodyDisplay = new WaterBodyDisplay(_water);
+			waterBodyDisplay.alpha = 0.75;
+			var display:StarlingDisplayComponent = new StarlingDisplayComponent(waterBodyDisplay, 10);
 			display.displayObject.pivotX = stage.stageWidth / 2;
 			display.displayObject.pivotY = stage.stageHeight / 4;			
 			_water.addComponent(display);
 			_water.refresh();
-		}
-		
-		
-		private function initRock():void
-		{
-			_rockTexture = Texture.fromBitmap(new RockTexture());
-			var rockImage:Image = new Image(_rockTexture);
-			var rockBody:Body = new Body(BodyType.DYNAMIC);
-			var shape:Shape = new Polygon(Polygon.box(rockImage.width, rockImage.height));
-			shape.material.density = 10;
-			shape.filter.fluidGroup = 2;
-			rockBody.shapes.add(shape);
-			rockBody.position.setxy(stage.stageWidth / 2, 100);
-			rockBody.cbTypes.add(Callbacks.SPLASHER);
 			
-			_rock = world.createEntity();
-			_rock.addComponent(new SpatialComponent());
-			_rock.addComponent(new VelocityComponent());
-			_rock.addComponent(new NapePhysicsComponent(rockBody));
-			_rock.addComponent(new StarlingDisplayComponent(rockImage, -1, true));
-			_rock.addToGroup(Group.SPLASHERS);
-			_rock.tag = "rock";
-			_rock.refresh();
+			// Water surface must be separate entity so that it can be rendered to the metaball texture.
+			_waterSurface = world.createEntity();
+			_waterSurface.addToGroup(Group.METABALLS);
+			_waterSurface.addComponent(new StarlingDisplayComponent(waterBodyDisplay.waterSurfaceDisplay));
+			_waterSurface.refresh();
 		}
 		
 		protected override function update(elaspedTime:Number):void

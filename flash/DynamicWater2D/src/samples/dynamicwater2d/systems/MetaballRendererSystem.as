@@ -14,6 +14,7 @@ package samples.dynamicwater2d.systems
 	import starling.display.BlendMode;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
+	import starling.display.Sprite;
 	import starling.textures.RenderTexture;
 	
 
@@ -30,19 +31,21 @@ package samples.dynamicwater2d.systems
 		
 		public override function init():void
 		{
-			_globalRenderTexture = new RenderTexture(QuadraGame.current.stage.stageWidth, QuadraGame.current.stage.stageHeight, false);
+			_globalRenderTexture = new RenderTexture(QuadraGame.current.stage.stageWidth, QuadraGame.current.stage.stageHeight, true);
 			_globalImage = new Image(_globalRenderTexture);
 			_globalImage.color = 0x337fcc;
-			_globalImage.filter = new AlphaTestFilter();
+			_globalImage.filter = new AlphaTestFilter(0.8, 0.75);
 			_globalEntity = world.createEntity();
 			_globalEntity.addComponent(new SpatialComponent());
-			_globalEntity.addComponent(new StarlingDisplayComponent(_globalImage));
+			_globalEntity.addComponent(new StarlingDisplayComponent(_globalImage, 10));
 			_globalEntity.tag = "globalMetaball";
 			_globalEntity.refresh();
 		}
 		
 		protected override function processEntities(entities:Vector.<Entity>, elaspedTime:Number):void
 		{
+			_globalRenderTexture.clear();
+			
 			var entity:Entity;
 			var display:StarlingDisplayComponent;
 			for (var i:int = 0; i < entities.length; ++i)
