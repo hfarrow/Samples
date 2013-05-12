@@ -53,7 +53,7 @@ package samples.dynamicwater2d.systems
 				poly.fluidEnabled = true;
 				poly.filter.fluidMask = 2;
 				poly.fluidProperties.density = 4;
-				poly.fluidProperties.viscosity = 5;
+				poly.fluidProperties.viscosity = 7;
 				body.shapes.add(poly);
 			}
 		}
@@ -70,7 +70,7 @@ package samples.dynamicwater2d.systems
 			{
 				entity = entities[i];
 				updateShapes(entity);
-				updateSprings(entity);
+				updateSprings(entity, elaspedTime);
 				updateDisplay(entity);
 			}
 		}
@@ -92,6 +92,8 @@ package samples.dynamicwater2d.systems
 			var water:WaterBodyComponent = WaterBodyComponent(splashable.getComponent(WaterBodyComponent));
 			var startX:Number = splasher.position.x - body.position.x + body.bounds.width / 2; // relative to water coords
 			
+			splasher.velocity.y /= 4;
+			
 			// Prevent a body from splashing more than once within a time frame.
 			// Since the surface of the water is animated, the animation can move
 			// faster than the splasher causing multiple collisions.
@@ -101,14 +103,13 @@ package samples.dynamicwater2d.systems
 				return;
 			}
 			splasher.userData.lastSplash = getTimer();
-			splasher.velocity.y /= 2;
 			
 			var index:int = int(splasher.position.x / water.springSpacing);
-			splashAtSpring(index, -speed / 10, water);
-			splashAtSpring(index + 1, -speed / 12, water);
-			splashAtSpring(index - 1, -speed / 12, water);
-			splashAtSpring(index + 2, -speed / 14, water);
-			splashAtSpring(index - 2, -speed / 14, water);
+			splashAtSpring(index, -speed * 1.3, water);
+			splashAtSpring(index + 1, -speed * 1.15, water);
+			splashAtSpring(index - 1, -speed * 1.15, water);
+			splashAtSpring(index + 2, -speed * 0.5, water);
+			splashAtSpring(index - 2, -speed * 0.5, water);
 			SplashEmitter.emitSlpash(water.splashSystem.createParticle, splasher.position.x, water.getHeightAtSpring(splasher.position.x) + splasher.position.y + splasher.bounds.height / 2, speed);
 		}
 		
@@ -141,7 +142,7 @@ package samples.dynamicwater2d.systems
 		
 		private var lDeltas:Array = new Array(); // Helper for updateSprings
 		private var rDeltas:Array = new Array(); // Helper for updateSprings
-		private function updateSprings(entity:Entity):void
+		private function updateSprings(entity:Entity, elaspedTime:Number):void
 		{
 			var waterBody:WaterBodyComponent = WaterBodyComponent(entity.getComponent(WaterBodyComponent));
 			var springs:Vector.<Spring> = waterBody.springs;
@@ -149,7 +150,7 @@ package samples.dynamicwater2d.systems
 			var i:int
 			for (i = 0; i < springs.length; ++i)
 			{
-				springs[i].update(waterBody.dampening, waterBody.tension);
+				springs[i].update(waterBody.dampening, waterBody.tension, elaspedTime);
 			}
 			
 			// do some passes where columns pull on their neighbours

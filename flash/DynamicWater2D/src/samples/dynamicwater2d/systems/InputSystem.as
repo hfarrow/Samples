@@ -62,7 +62,7 @@ package samples.dynamicwater2d.systems
 			var rockImage:Image = new Image(_rockTexture);
 			var rockBody:Body = new Body(BodyType.DYNAMIC);
 			var shape:Shape = new Polygon(Polygon.box(rockImage.width, rockImage.height));
-			shape.material.density = 1;
+			shape.material.density = 2;
 			shape.filter.fluidGroup = 2;
 			rockBody.shapes.add(shape);
 			rockBody.position.setxy(QuadraGame.current.stage.stageWidth / 2, 100);

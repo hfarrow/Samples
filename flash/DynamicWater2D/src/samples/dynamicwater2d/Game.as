@@ -111,7 +111,7 @@ package samples.dynamicwater2d
 			waterBody.cbTypes.add(Callbacks.SPLASHABLE);
 			
 			_water = world.createEntity();
-			var waterBodyCmp:WaterBodyComponent = new WaterBodyComponent(NUM_SPRINGS, SPRING_SPACING, stage.stageHeight / 2, .2, .025, .025);
+			var waterBodyCmp:WaterBodyComponent = new WaterBodyComponent(NUM_SPRINGS, SPRING_SPACING, stage.stageHeight / 2, .2 * 100, .025 * 20, .020);
 			_water.addComponent(waterBodyCmp);
 			_water.addComponent(new SpatialComponent());
 			_water.addComponent(new VelocityComponent());

@@ -5,7 +5,7 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="bin\DynamicWater2D.swf" />
-    <movie fps="30" />
+    <movie fps="60" />
     <movie width="740" />
     <movie height="480" />
     <movie version="11" />

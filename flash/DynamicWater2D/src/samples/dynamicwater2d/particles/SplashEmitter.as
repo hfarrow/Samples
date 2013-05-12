@@ -6,7 +6,7 @@ package samples.dynamicwater2d.particles
 	{		
 		public static function emitSlpash(createFunction:Function, x:Number, y:Number, speed:Number):void
 		{
-			if (speed > 50)
+			if (speed > 75)
 			{
 				for (var i:int = 0; i < int(Math.abs(speed)) / 12; ++i)
 				{

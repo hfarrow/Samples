@@ -15,11 +15,11 @@ package samples.dynamicwater2d
 			speed = 0;
 		}
 		
-		public function update(dampening:Number, tension:Number):void
+		public function update(dampening:Number, tension:Number, elaspedTime:Number):void
 		{
 			var x:Number = targetPosition - position;
-			speed += tension * x - speed * dampening;
-			position += speed;
+			speed += (tension * x - speed * dampening) * elaspedTime;
+			position += speed * elaspedTime;
 		}
 	}
 }
