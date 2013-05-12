@@ -5,7 +5,6 @@ package samples.dynamicwater2d.systems
 	import nape.phys.BodyType;
 	import nape.shape.Polygon;
 	import nape.shape.Shape;
-	import quadra.core.EventManager;
 	import quadra.core.QuadraGame;
 	import quadra.world.components.lib.NapePhysicsComponent;
 	import quadra.world.components.lib.SpatialComponent;
@@ -14,7 +13,6 @@ package samples.dynamicwater2d.systems
 	import quadra.world.Entity;
 	import quadra.world.systems.ProcessingSystem;
 	import samples.dynamicwater2d.events.Callbacks;
-	import samples.dynamicwater2d.events.GameEvent;
 	import samples.dynamicwater2d.Game;
 	import samples.dynamicwater2d.Group;
 	import starling.display.Image;
@@ -45,22 +43,8 @@ package samples.dynamicwater2d.systems
 			if (touch)
 			{
 				var localPos:Point = touch.getLocation(Game.current);
-				trace("Touched object at position: " + localPos);
-				
-					//var rock:Entity = world.tagManager.getTag("rock");
-					//var body:Body = NapePhysicsComponent(rock.getComponent(NapePhysicsComponent)).body;
-					//body.position.setxy(localPos.x, localPos.y);
-					//body.velocity.setxy(0, 0);
-					
-					initRock(localPos);
-				
-					//if (!_isDroppingRock)
-					//{
-					//_rock.visible = true;
-					//_isDroppingRock = true;
-					//_rock.x = localPos.x;
-					//_rock.y = localPos.y;
-					//}
+				//trace("Touched object at position: " + localPos);
+				initRock(localPos);
 			}
 			
 			touch = event.getTouch(Game.current.stage, TouchPhase.HOVER);

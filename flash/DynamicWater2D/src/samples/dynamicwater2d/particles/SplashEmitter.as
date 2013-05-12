@@ -6,9 +6,8 @@ package samples.dynamicwater2d.particles
 	{		
 		public static function emitSlpash(createFunction:Function, x:Number, y:Number, speed:Number):void
 		{
-			if (speed > 0)
+			if (speed > 50)
 			{
-				trace("Spawn " + (int(Math.abs(speed)) / 12) + " particles");
 				for (var i:int = 0; i < int(Math.abs(speed)) / 12; ++i)
 				{
 					var randomX:Number = Math.random() * 20 - 10;

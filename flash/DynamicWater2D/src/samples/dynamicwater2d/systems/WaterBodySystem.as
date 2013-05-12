@@ -1,14 +1,11 @@
 package samples.dynamicwater2d.systems
 {
-	import flash.geom.Matrix;
 	import flash.utils.getTimer;
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.InteractionCallback;
 	import nape.callbacks.InteractionListener;
 	import nape.callbacks.InteractionType;
 	import nape.callbacks.Listener;
-	import nape.geom.Mat23;
-	import nape.geom.Vec2;
 	import nape.phys.Body;
 	import nape.shape.Polygon;
 	import quadra.world.components.lib.NapePhysicsComponent;
@@ -20,12 +17,8 @@ package samples.dynamicwater2d.systems
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
 	import samples.dynamicwater2d.events.Callbacks;
-	import samples.dynamicwater2d.events.GameEvent;
-	import samples.dynamicwater2d.Game;
 	import samples.dynamicwater2d.particles.SplashEmitter;
 	import samples.dynamicwater2d.Spring;
-	import starling.events.Event;
-	import starling.utils.MatrixUtil;
 	
 
 	public class WaterBodySystem extends EntitySystem

@@ -1,8 +1,6 @@
 package samples.dynamicwater2d.components
 {
-	import quadra.world.Entity;
 	import quadra.world.IEntityComponent;
-	import samples.dynamicwater2d.particles.SplashEmitter;
 	import samples.dynamicwater2d.Spring;
 	
 

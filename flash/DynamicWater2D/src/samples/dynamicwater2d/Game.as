@@ -3,8 +3,6 @@ package samples.dynamicwater2d
 	import nape.geom.Vec2;
 	import nape.phys.Body;
 	import nape.phys.BodyType;
-	import nape.shape.Polygon;
-	import nape.shape.Shape;
 	import quadra.core.QuadraSample;
 	import quadra.world.components.lib.NapePhysicsComponent;
 	import quadra.world.components.lib.SpatialComponent;
@@ -61,8 +59,10 @@ package samples.dynamicwater2d
 		{
 			initWorld();
 			initSky();
-			initParticleSystem();
 			initWater();
+			initParticleSystem();
+			var waterBodyCmp:WaterBodyComponent = WaterBodyComponent(_water.getComponent(WaterBodyComponent));
+			waterBodyCmp.splashSystem = ParticleSystemComponent(_particleSystem.getComponent(ParticleSystemComponent));
 		}
 		
 		private function initWorld():void
@@ -96,7 +96,7 @@ package samples.dynamicwater2d
 			var system:ParticleSystemComponent = new ParticleSystemComponent(1000);
 			system.mutators.push(new VelocityMutator(new Vec2(0, 250)));
 			system.mutators.push(new PositionMutator());
-			system.mutators.push(new SplashLifeMutator(stage.stageHeight / 2 + 0));
+			system.mutators.push(new SplashLifeMutator(_water, stage.stageHeight / 4));
 			_particleSystem.addComponent(system);
 			_particleSystem.addComponent(new StarlingDisplayComponent(new ParticleSystemDisplay(system, _dropletTexture)));
 			_particleSystem.addToGroup(Group.METABALLS);
@@ -112,7 +112,6 @@ package samples.dynamicwater2d
 			
 			_water = world.createEntity();
 			var waterBodyCmp:WaterBodyComponent = new WaterBodyComponent(NUM_SPRINGS, SPRING_SPACING, stage.stageHeight / 2, .2, .025, .025);
-			waterBodyCmp.splashSystem = ParticleSystemComponent(_particleSystem.getComponent(ParticleSystemComponent));
 			_water.addComponent(waterBodyCmp);
 			_water.addComponent(new SpatialComponent());
 			_water.addComponent(new VelocityComponent());

@@ -5,16 +5,13 @@ package samples.dynamicwater2d.systems
 	import quadra.display.filters.AlphaTestFilter;
 	import quadra.world.components.lib.SpatialComponent;
 	import quadra.world.components.lib.StarlingDisplayComponent;
-	import quadra.world.components.lib.VelocityComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.GroupSystem;
-	import samples.dynamicwater2d.Game;
 	import samples.dynamicwater2d.Group;
 	import starling.display.BlendMode;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
-	import starling.display.Sprite;
 	import starling.textures.RenderTexture;
 	
 
