@@ -23,7 +23,7 @@ package samples.dynamicwater2d.systems
 
 	public class WaterBodySystem extends EntitySystem
 	{
-		private static const MIN_TIME_BETWEEN_SPLASHES:int = 500;
+		private static const MIN_TIME_BETWEEN_SPLASHES:int = 750;
 		
 		private var _splashListener:Listener;
 		private var _physicsSystem:NapePhysicsSystem;
@@ -92,7 +92,7 @@ package samples.dynamicwater2d.systems
 			var water:WaterBodyComponent = WaterBodyComponent(splashable.getComponent(WaterBodyComponent));
 			var startX:Number = splasher.position.x - body.position.x + body.bounds.width / 2; // relative to water coords
 			
-			splasher.velocity.y /= 3;
+			splasher.velocity.y /= 2;
 			
 			// Prevent a body from splashing more than once within a time frame.
 			// Since the surface of the water is animated, the animation can move
@@ -105,11 +105,12 @@ package samples.dynamicwater2d.systems
 			splasher.userData.lastSplash = getTimer();
 			
 			var index:int = int(Math.round(splasher.position.x / water.springSpacing));
-			splashAtSpring(index, -speed * 1.2, water);
-			splashAtSpring(index + 1, -speed * 1.1, water);
-			splashAtSpring(index - 1, -speed * 1.1, water);
-			splashAtSpring(index + 2, -speed * 0.25, water);
-			splashAtSpring(index - 2, -speed * 0.25, water);
+			splashAtSpring(index, -speed * 0.035, water);
+			splashAtSpring(index + 1, -speed * 0.025, water);
+			splashAtSpring(index - 1, -speed * 0.025, water);
+			splashAtSpring(index + 2, -speed * 0.015, water);
+			splashAtSpring(index - 2, -speed * 0.015, water);
+			
 			SplashEmitter.emitSlpash(water.splashSystem.createParticle,
 									 splasher.position.x,
 									 water.getHeightAtSpring(splasher.position.x) + splasher.position.y + splasher.bounds.height / 2,

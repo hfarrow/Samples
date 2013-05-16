@@ -14,7 +14,7 @@ package samples.dynamicwater2d.systems
 		
 		protected override function processEntities(entities:Vector.<Entity>, elaspedTime:Number):void
 		{			
-			while (entities.length > 10)
+			while (entities.length > 7)
 			{
 				entities[0].removeFromWorld();
 			}

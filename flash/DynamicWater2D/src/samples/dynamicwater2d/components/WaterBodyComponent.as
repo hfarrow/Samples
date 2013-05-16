@@ -13,19 +13,21 @@ package samples.dynamicwater2d.components
 		private var _spread:Number;
 		private var _springSpacing:Number;
 		private var _depth:Number;
+		private var _maxWaveHeight:Number;
 		
-		public function WaterBodyComponent(numSprings:int, springSpacing:Number, depth:Number, tension:Number=.025, dampening:Number=.025, spread:Number=.25)
+		public function WaterBodyComponent(numSprings:int, springSpacing:Number, depth:Number, tension:Number = .025, dampening:Number = .025, spread:Number = .25, maxWaveHeight:Number = 0 )
 		{
 			_springSpacing = springSpacing;
 			_depth = depth;
 			_tension = tension;
 			_dampening = dampening;
-			_spread = spread;			
+			_spread = spread;
+			_maxWaveHeight = maxWaveHeight;
 			
 			_springs = new Vector.<Spring>(numSprings, true);
 			for ( var i:int = 0; i < numSprings; ++i)
 			{
-				_springs[i] = new Spring(0);
+				_springs[i] = new Spring(0, _maxWaveHeight);
 			}
 		}
 		
@@ -57,6 +59,11 @@ package samples.dynamicwater2d.components
 		public function get depth():Number
 		{
 			return _depth;
+		}
+		
+		public function get maxWaveHeight():Number
+		{
+			return _maxWaveHeight;
 		}
 		
 		public function getHeightAtSpring(x:Number):Number

@@ -74,7 +74,7 @@ package samples.dynamicwater2d.display
 			
 			var maxColor:uint = 0x337fcc;
 			var minColor:uint = 0x000033;
-			var midColor:uint = Lerp.color(minColor, maxColor, 0.9);
+			var midColor:uint = Lerp.color(minColor, maxColor, 0.95);
 			
 			var surfaceTransform:Matrix = getTransformationMatrix(QuadraGame.current);
 			
