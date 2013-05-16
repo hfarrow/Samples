@@ -1,6 +1,6 @@
 package samples.dynamicwater2d.particles
 {
-	import quadra.world.components.lib.SpatialComponent;
+	import quadra.world.lib.components.SpatialComponent;
 	import quadra.world.Entity;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 

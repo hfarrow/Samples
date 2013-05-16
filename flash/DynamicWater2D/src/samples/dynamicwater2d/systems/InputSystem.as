@@ -6,10 +6,10 @@ package samples.dynamicwater2d.systems
 	import nape.shape.Polygon;
 	import nape.shape.Shape;
 	import quadra.core.QuadraGame;
-	import quadra.world.components.lib.NapePhysicsComponent;
-	import quadra.world.components.lib.SpatialComponent;
-	import quadra.world.components.lib.StarlingDisplayComponent;
-	import quadra.world.components.lib.VelocityComponent;
+	import quadra.world.lib.components.NapePhysicsComponent;
+	import quadra.world.lib.components.SpatialComponent;
+	import quadra.world.lib.components.StarlingDisplayComponent;
+	import quadra.world.lib.components.VelocityComponent;
 	import quadra.world.Entity;
 	import quadra.world.systems.ProcessingSystem;
 	import samples.dynamicwater2d.events.Callbacks;

@@ -3,8 +3,8 @@ package samples.dynamicwater2d.systems
 	import flash.geom.Matrix;
 	import quadra.core.QuadraGame;
 	import quadra.display.filters.AlphaTestFilter;
-	import quadra.world.components.lib.SpatialComponent;
-	import quadra.world.components.lib.StarlingDisplayComponent;
+	import quadra.world.lib.components.SpatialComponent;
+	import quadra.world.lib.components.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.GroupSystem;

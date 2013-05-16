@@ -1,6 +1,6 @@
 package samples.dynamicwater2d.systems
 {
-	import quadra.world.components.lib.StarlingDisplayComponent;
+	import quadra.world.lib.components.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.EntitySystem;	

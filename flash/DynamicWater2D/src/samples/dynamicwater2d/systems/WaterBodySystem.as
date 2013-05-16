@@ -8,12 +8,12 @@ package samples.dynamicwater2d.systems
 	import nape.callbacks.Listener;
 	import nape.phys.Body;
 	import nape.shape.Polygon;
-	import quadra.world.components.lib.NapePhysicsComponent;
-	import quadra.world.components.lib.StarlingDisplayComponent;
+	import quadra.world.lib.components.NapePhysicsComponent;
+	import quadra.world.lib.components.StarlingDisplayComponent;
 	import quadra.world.Entity;
 	import quadra.world.EntityFilter;
 	import quadra.world.systems.EntitySystem;
-	import quadra.world.systems.lib.NapePhysicsSystem;
+	import quadra.world.lib.systems.NapePhysicsSystem;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.WaterBodyDisplay;
 	import samples.dynamicwater2d.events.Callbacks;
