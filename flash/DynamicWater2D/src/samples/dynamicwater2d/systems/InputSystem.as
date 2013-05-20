@@ -74,7 +74,7 @@ package samples.dynamicwater2d.systems
 			rock.addComponent(new SpatialComponent());
 			rock.addComponent(new VelocityComponent());
 			rock.addComponent(new NapePhysicsComponent(rockBody));
-			rock.addComponent(new StarlingDisplayComponent(rockImage, 0, true));
+			rock.addComponent(new StarlingDisplayComponent(rockImage, 0, null, true));
 			rock.addToGroup(Group.SPLASHERS);
 			rock.addToGroup(Group.ROCK);
 			rock.refresh();

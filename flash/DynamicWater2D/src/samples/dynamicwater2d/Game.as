@@ -4,13 +4,13 @@ package samples.dynamicwater2d
 	import nape.phys.Body;
 	import nape.phys.BodyType;
 	import quadra.core.QuadraSample;
+	import quadra.world.Entity;
 	import quadra.world.lib.components.NapePhysicsComponent;
 	import quadra.world.lib.components.SpatialComponent;
 	import quadra.world.lib.components.StarlingDisplayComponent;
 	import quadra.world.lib.components.VelocityComponent;
-	import quadra.world.Entity;
-	import quadra.world.lib.systems.starling.StarlingRenderSystem;
 	import quadra.world.lib.systems.NapePhysicsSystem;
+	import quadra.world.lib.systems.starling.StarlingRenderSystem;
 	import samples.dynamicwater2d.components.ParticleSystemComponent;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.display.ParticleSystemDisplay;
@@ -26,6 +26,7 @@ package samples.dynamicwater2d
 	import samples.dynamicwater2d.systems.WaterBodySystem;
 	import starling.core.Starling;
 	import starling.display.Image;
+	import starling.textures.RenderTexture;
 	import starling.textures.Texture;
 	
 	public class Game extends QuadraSample
@@ -33,6 +34,7 @@ package samples.dynamicwater2d
 		public static const NUM_SPRINGS:int = 51;
 		public static const SPRING_SPACING:Number = 14.8;
 		public static const WATER_DEPTH:Number = 240;
+		public static const META_BALL_TEXTURE:String = "metaball";
 		
 		[Embed(source = "../../../content/metaparticle.png")]
 		private var DropletTexture:Class;
@@ -46,7 +48,7 @@ package samples.dynamicwater2d
 		
 		private var _sky:Entity;
 		private var _water:Entity;
-		private var _waterSurface:Entity;
+		
 		private var _rock:Entity;
 		private var _particleSystem:Entity;
 		
@@ -62,6 +64,7 @@ package samples.dynamicwater2d
 			initSky();
 			initWater();
 			initParticleSystem();
+			
 			var waterBodyCmp:WaterBodyComponent = WaterBodyComponent(_water.getComponent(WaterBodyComponent));
 			waterBodyCmp.splashSystem = ParticleSystemComponent(_particleSystem.getComponent(ParticleSystemComponent));
 		}
@@ -86,23 +89,8 @@ package samples.dynamicwater2d
 			
 			_sky = world.createEntity();
 			_sky.addComponent(new SpatialComponent());
-			_sky.addComponent(new StarlingDisplayComponent(skyImage, -1, true));
+			_sky.addComponent(new StarlingDisplayComponent(skyImage, -1, null, true));
 			_sky.refresh();
-		}
-		
-		private function initParticleSystem():void
-		{
-			_dropletTexture = Texture.fromBitmap(new DropletTexture());
-			
-			_particleSystem = world.createEntity();
-			var system:ParticleSystemComponent = new ParticleSystemComponent(1000);
-			system.mutators.push(new VelocityMutator(new Vec2(0, 250)));
-			system.mutators.push(new PositionMutator());
-			system.mutators.push(new SplashLifeMutator(_water, stage.stageHeight / 4));
-			_particleSystem.addComponent(system);
-			_particleSystem.addComponent(new StarlingDisplayComponent(new ParticleSystemDisplay(system, _dropletTexture)));
-			_particleSystem.addToGroup(Group.METABALLS);
-			_particleSystem.refresh();
 		}
 		
 		private function initWater():void
@@ -118,19 +106,29 @@ package samples.dynamicwater2d
 			_water.addComponent(new SpatialComponent());
 			_water.addComponent(new VelocityComponent());
 			_water.addComponent(new NapePhysicsComponent(waterBody));
-			var waterBodyDisplay:WaterBodyDisplay = new WaterBodyDisplay(_water);
+			var waterBodyDisplay:WaterBodyDisplay = new WaterBodyDisplay(_water, world.createEntity("waterSurface"), Group.METABALLS, META_BALL_TEXTURE);
 			waterBodyDisplay.alpha = 0.75;
 			var display:StarlingDisplayComponent = new StarlingDisplayComponent(waterBodyDisplay, 10);
 			display.displayObject.pivotX = stage.stageWidth / 2;
 			display.displayObject.pivotY = stage.stageHeight / 4;			
 			_water.addComponent(display);
 			_water.refresh();
+		}
+		
+		private function initParticleSystem():void
+		{
+			_dropletTexture = Texture.fromBitmap(new DropletTexture());
 			
-			// Water surface must be separate entity so that it can be rendered to the metaball texture.
-			_waterSurface = world.createEntity();
-			_waterSurface.addToGroup(Group.METABALLS);
-			_waterSurface.addComponent(new StarlingDisplayComponent(waterBodyDisplay.waterSurfaceDisplay));
-			_waterSurface.refresh();
+			_particleSystem = world.createEntity();
+			var system:ParticleSystemComponent = new ParticleSystemComponent(1000);
+			system.mutators.push(new VelocityMutator(new Vec2(0, 250)));
+			system.mutators.push(new PositionMutator());
+			system.mutators.push(new SplashLifeMutator(_water, stage.stageHeight / 4));
+			_particleSystem.addComponent(system);
+			_particleSystem.addComponent(new SpatialComponent());
+			_particleSystem.addComponent(new StarlingDisplayComponent(new ParticleSystemDisplay(system, _dropletTexture), -1, META_BALL_TEXTURE));
+			_particleSystem.addToGroup(Group.METABALLS);
+			_particleSystem.refresh();
 		}
 		
 		protected override function update(elaspedTime:Number):void

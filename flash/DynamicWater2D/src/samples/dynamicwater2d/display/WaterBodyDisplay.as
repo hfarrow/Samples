@@ -6,6 +6,7 @@ package samples.dynamicwater2d.display
 	import quadra.display.TriangleBatch;
 	import quadra.utils.Lerp;
 	import quadra.world.Entity;
+	import quadra.world.lib.components.StarlingDisplayComponent;
 	import samples.dynamicwater2d.components.WaterBodyComponent;
 	import samples.dynamicwater2d.Spring;
 	import starling.display.DisplayObject;
@@ -16,7 +17,7 @@ package samples.dynamicwater2d.display
 
 	public class WaterBodyDisplay extends Sprite
 	{
-		private var _entity:Entity;
+		private var _bodyEntity:Entity;
 		private var _waterBody:WaterBodyComponent;
 		private var _waterBodyBatch:TriangleBatch;
 		private var _waterSurfaceBatch:TriangleBatch;
@@ -24,10 +25,18 @@ package samples.dynamicwater2d.display
 		private var _vertexDataSurface:VertexData;
 		private var _indices:Vector.<uint>;
 		
-		public function WaterBodyDisplay(entity:Entity)
+		private var _surfaceGroup:uint;
+		private var _surfaceRenderTarget:String;
+		private var _surfaceEntity:Entity;
+		
+		public function WaterBodyDisplay(bodyEntity:Entity, surfaceEntity:Entity, surfaceGroup:uint, surfaceRenderTarget:String)
 		{
-			_entity = entity;
-			_waterBody = WaterBodyComponent(_entity.getComponent(WaterBodyComponent));
+			_bodyEntity = bodyEntity;
+			_waterBody = WaterBodyComponent(_bodyEntity.getComponent(WaterBodyComponent));
+			
+			_surfaceEntity = surfaceEntity;
+			_surfaceGroup = surfaceGroup;
+			_surfaceRenderTarget = surfaceRenderTarget;
 			
 			initWaterBody();
 			initWaterSurface();
@@ -49,16 +58,16 @@ package samples.dynamicwater2d.display
 			_waterSurfaceBatch = new TriangleBatch();
 			_vertexDataSurface = new VertexData(_waterBody.springs.length * 4);
 			_vertexDataSurface.setUniformColor(0xffffff);
+			
+			// Water surface must be separate entity so that it can be rendered to the metaball texture.
+			_surfaceEntity.addToGroup(_surfaceGroup);
+			_surfaceEntity.addComponent(new StarlingDisplayComponent(_waterSurfaceBatch, -1, _surfaceRenderTarget));
+			_surfaceEntity.refresh();
 		}
 		
 		public override function dispose():void
 		{
 			super.dispose();
-		}
-		
-		public function get waterSurfaceDisplay():DisplayObject
-		{
-			return _waterSurfaceBatch;
 		}
 		
 		public function update():void
